@@ -1,0 +1,235 @@
+{
+    "chain": [
+        {
+            "index": 1,
+            "timestamp": "2025-10-17 00:43:56.130598",
+            "proof": 1,
+            "previous_hash": "0",
+            "transactions": []
+        },
+        {
+            "index": 2,
+            "timestamp": "2025-10-17 00:52:21.111815",
+            "proof": 533,
+            "previous_hash": "6e10ca29b09be5e5659179a9f16a4616775549ac0b239a3513c9c5aab6e56197",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "arda",
+                    "location_id": "ümraniye",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "transfer",
+                    "sender": "Kullanici_A",
+                    "receiver": "Kullanici_B",
+                    "amount": 5
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_c216f1d9",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "timestamp": "2025-10-17 00:54:35.000056",
+            "proof": 45293,
+            "previous_hash": "9a82551e4b5d77a2ecdc7a2b2ec6dda8ce9f3d056725b616cba39910039c9f12",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "arda",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_5c411eb2",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 4,
+            "timestamp": "2025-10-17 01:03:55.690507",
+            "proof": 21391,
+            "previous_hash": "4c9143999ce0b7b162de4b905450f0a1735b5dfd1a3f5e89ec94232b4f17b49f",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "Kullanici_A",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "comment",
+                    "user_id": "Kullanici_A",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_76b30af5",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 5,
+            "timestamp": "2025-10-17 01:04:55.719121",
+            "proof": 8018,
+            "previous_hash": "bb17990c52c477bb779eea0dfc0e1cdae1f81bad56a8c5e0c8eb28d1e7fd1344",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "asdadad",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_76b30af5",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 6,
+            "timestamp": "2025-10-17 01:05:55.905563",
+            "proof": 48191,
+            "previous_hash": "9873ff1bf415b44d7591c85af9cf3d8ab65cabbb1323776b781e9071197407b0",
+            "transactions": [
+                {
+                    "type": "transfer",
+                    "sender": "Kullanici_A",
+                    "receiver": "Kullanici_B",
+                    "amount": 5
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_76b30af5",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 7,
+            "timestamp": "2025-10-17 01:14:55.177096",
+            "proof": 19865,
+            "previous_hash": "6e0f36e2ddbbf40327e83b0b0c495e9c5c28961989f5dfb934d18eef30aa840c",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "arda",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_d1c35183",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 8,
+            "timestamp": "2025-10-17 01:17:55.564202",
+            "proof": 95063,
+            "previous_hash": "ac844a715a372007c914c7bb1409963422867f56659535f3248f1970ea919fc5",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "arda",
+                    "location_id": "Star_Cafe_45",
+                    "rating": 5,
+                    "comment_text": "Kahveler harika, ortam çok samimiydi. Keşif Puanını hak etti!"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "KEŞİF_MADENCİSİ_d1c35183",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 9,
+            "timestamp": "2025-10-17 01:28:03.739092",
+            "proof": 15457,
+            "previous_hash": "857fefdba29732590bcc9fc030a4a5e9d91347e308556baf58ef2ea395053dea",
+            "transactions": [
+                {
+                    "type": "bonus",
+                    "sender": "SYSTEM",
+                    "receiver": "arda",
+                    "amount": 10,
+                    "reason": "Hoş geldin bonusu"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "MINER_ad44948c",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 10,
+            "timestamp": "2025-10-17 01:34:49.331222",
+            "proof": 15479,
+            "previous_hash": "9cbe45e79cfb6e1b98a87c95ac79c0f759c190bc352ab3a622c1d61eaec36bbc",
+            "transactions": [
+                {
+                    "type": "comment",
+                    "user_id": "arda",
+                    "wallet_address": "0x5696d539b4ffc960aacbcc0c6982392085d0a141",
+                    "location_id": "merkez",
+                    "rating": 5,
+                    "comment_text": "guzeeel"
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "MINER_cba4f046",
+                    "amount": 1
+                }
+            ]
+        },
+        {
+            "index": 11,
+            "timestamp": "2025-10-17 01:37:49.369619",
+            "proof": 7889,
+            "previous_hash": "69cdfb5734ed6eeb60f3c56e85722bf8d9620aaaaf1dc52eba5a2532c69c0013",
+            "transactions": [
+                {
+                    "type": "transfer",
+                    "sender": "arda",
+                    "receiver": "MINER_cba4f046",
+                    "amount": 1
+                },
+                {
+                    "type": "reward",
+                    "sender": "0",
+                    "receiver": "MINER_cba4f046",
+                    "amount": 1
+                }
+            ]
+        }
+    ],
+    "transactions": [],
+    "nodes": []
+}

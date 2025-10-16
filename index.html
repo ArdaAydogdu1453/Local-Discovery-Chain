@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yerel Keşif Zinciri - Blockchain Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        /* Login Screen */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo h1 {
+            color: var(--primary);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .auth-logo p {
+            color: #6b7280;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: var(--light);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .topbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .wallet-badge {
+            background: var(--light);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance-display {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 15px;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .stat-card-title {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .stat-card-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: var(--light);
+            transition: all 0.3s;
+        }
+
+        .leaderboard-item:hover {
+            background: #e5e7eb;
+            transform: translateX(5px);
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #cbd5e1, #94a3b8); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #fb923c, #ea580c); color: white; }
+        .rank-other { background: var(--border); color: var(--dark); }
+
+        .location-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .location-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .location-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .location-content {
+            padding: 20px;
+        }
+
+        .location-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .location-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2em;
+        }
+
+        .comment-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .comment-user {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .comment-date {
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+
+        .notification-toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-toast.show {
+            display: flex;
+        }
+
+        .toast-icon {
+            font-size: 2em;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                overflow-x: scroll;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Notification Toast -->
+<div class="notification-toast" id="toast">
+    <div class="toast-icon" id="toast-icon">🎉</div>
+    <div class="toast-content">
+        <div class="toast-title" id="toast-title">Bildirim</div>
+        <div id="toast-message">Mesaj</div>
+    </div>
+</div>
+
+<!-- Auth Screen -->
+<div class="auth-container" id="authScreen">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <h1>🔗 Keşif Zinciri</h1>
+            <p>Blockchain ile Yerel İşletmeleri Keşfedin</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" style="display: block;">
+            <div class="form-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="login_username" placeholder="kullaniciadi" required>
+            </div>
+            <div class="form-group">
+                <label>Şifre</label>
+                <input type="password" id="login_password" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            <div class="message" id="login-message"></div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" style="display: none;">
+            <div class="form-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="reg_username" placeholder="kullaniciadi" required>
+            </div>
+            <div class="form-group">
+                <label>E-posta</label>
+                <input type="email" id="reg_email" placeholder="email@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Şifre (min 6 karakter)</label>
+                <input type="password" id="reg_password" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+            <div class="message" id="register-message"></div>
+        </form>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="logo">🔗 Keşif Zinciri</div>
+        </div>
+        <div class="user-info">
+            <div class="wallet-badge">
+                <span>💰</span>
+                <span class="balance-display" id="user-balance">0</span>
+                <span>Puan</span>
+            </div>
+            <div class="user-avatar" id="user-avatar">K</div>
+            <span id="username-display"></span>
+            <button class="btn-logout" onclick="logout()">Çıkış</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('explore')">🗺️ Mekanlar</button>
+            <button class="nav-tab" onclick="switchTab('wallet')">💼 Cüzdan</button>
+            <button class="nav-tab" onclick="switchTab('leaderboard')">🏆 Lider Tablosu</button>
+            <button class="nav-tab" onclick="switchTab('blockchain')">⛓️ Blockchain</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="cards-grid">
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background: #dbeafe; color: #3b82f6;">💰</div>
+                    <div class="stat-card-title">Toplam Puanım</div>
+                    <div class="stat-card-value" id="stat-balance">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background: #d1fae5; color: #10b981;">💬</div>
+                    <div class="stat-card-title">Yorumlarım</div>
+                    <div class="stat-card-value" id="stat-comments">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background: #fef3c7; color: #f59e0b;">🎁</div>
+                    <div class="stat-card-title">Kazandığım Ödüller</div>
+                    <div class="stat-card-value" id="stat-rewards">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Aktivite Grafiği</h2>
+                </div>
+                <canvas id="activityChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- Explore Tab -->
+        <div class="tab-content" id="tab-explore">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Mekanları Keşfet</h2>
+                    <button class="btn btn-primary" onclick="openModal('addLocationModal')" style="width: auto; padding: 10px 20px;">➕ Mekan Ekle</button>
+                </div>
+                <div class="cards-grid" id="locations-list">
+                    <p style="text-align: center; padding: 40px; color: #6b7280;">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Tab -->
+        <div class="tab-content" id="tab-wallet">
+            <div class="cards-grid">
+                <div class="card">
+                    <h2 class="card-title">💸 Puan Gönder</h2>
+                    <div class="form-group">
+                        <label>Alıcı Kullanıcı Adı</label>
+                        <input type="text" id="transfer_receiver" placeholder="kullaniciadi">
+                    </div>
+                    <div class="form-group">
+                        <label>Miktar</label>
+                        <input type="number" id="transfer_amount" placeholder="5" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="sendPoints()">Gönder</button>
+                    <div class="message" id="transfer-message"></div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">👤 Cüzdan Bilgileri</h2>
+                    <div style="padding: 20px; background: var(--light); border-radius: 10px; margin-top: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>Wallet Adresi:</strong></p>
+                        <p style="word-break: break-all; color: #6b7280; font-family: monospace;" id="wallet-address">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div class="tab-content" id="tab-leaderboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🏆 En Aktif Kullanıcılar</h2>
+                </div>
+                <div id="leaderboard-list">
+                    <p style="text-align: center; padding: 40px;">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blockchain Tab -->
+        <div class="tab-content" id="tab-blockchain">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">⛓️ Blok Zinciri</h2>
+                    <button class="btn btn-primary" onclick="loadBlockchain()" style="width: auto; padding: 10px 20px;">🔄 Yenile</button>
+                </div>
+                <div id="blockchain-display">
+                    <p style="text-align: center; padding: 40px;">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Location Modal -->
+<div class="modal" id="addLocationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Yeni Mekan Ekle</h2>
+            <button class="modal-close" onclick="closeModal('addLocationModal')">×</button>
+        </div>
+        <form id="addLocationForm">
+            <div class="form-group">
+                <label>Mekan ID (benzersiz)</label>
+                <input type="text" id="new_location_id" required placeholder="cafe_merkez_45">
+            </div>
+            <div class="form-group">
+                <label>Mekan Adı</label>
+                <input type="text" id="new_location_name" required placeholder="Merkez Kafe">
+            </div>
+            <div class="form-group">
+                <label>Kategori</label>
+                <select id="new_location_category">
+                    <option value="Kafe">Kafe</option>
+                    <option value="Restoran">Restoran</option>
+                    <option value="Bar">Bar</option>
+                    <option value="Butik">Butik</option>
+                    <option value="Sanat">Sanat Atölyesi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Adres</label>
+                <input type="text" id="new_location_address" placeholder="İstiklal Caddesi No:123">
+            </div>
+            <div class="form-group">
+                <label>Açıklama</label>
+                <textarea id="new_location_description" placeholder="Mekan hakkında kısa bilgi..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Ekle</button>
+            <div class="message" id="location-message"></div>
+        </form>
+    </div>
+</div>
+
+<!-- Comment Modal -->
+<div class="modal" id="commentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="comment-modal-title">Yorum Ekle</h2>
+            <button class="modal-close" onclick="closeModal('commentModal')">×</button>
+        </div>
+        <form id="addCommentForm">
+            <input type="hidden" id="comment_location_id">
+            <div class="form-group">
+                <label>Puan</label>
+                <select id="comment_rating">
+                    <option value="5">⭐⭐⭐⭐⭐ Mükemmel</option>
+                    <option value="4">⭐⭐⭐⭐ Çok İyi</option>
+                    <option value="3">⭐⭐⭐ İyi</option>
+                    <option value="2">⭐⭐ Orta</option>
+                    <option value="1">⭐ Kötü</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Yorumunuz</label>
+                <textarea id="comment_text" required placeholder="Deneyiminizi paylaşın..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Gönder</button>
+            <div class="message" id="comment-message"></div>
+        </form>
+    </div>
+</div>
+
+<!-- Location Details Modal -->
+<div class="modal" id="locationDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="location-detail-title">Mekan Detayları</h2>
+            <button class="modal-close" onclick="closeModal('locationDetailsModal')">×</button>
+        </div>
+        <div id="location-details-content">
+            <p style="text-align: center; padding: 40px;">Yükleniyor...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://127.0.0.1:5000';
+    let socket = null;
+    let currentUser = null;
+    let authToken = null;
+    let activityChart = null;
+
+    // ==================== AUTH FUNCTIONS ====================
+
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        if (tab === 'login') {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        } else {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('login_username').value.trim();
+        const password = document.getElementById('login_password').value;
+        
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                authToken = data.token;
+                currentUser = data.user;
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showToast('Giriş Başarılı!', `Hoş geldin ${currentUser.username}!`, '🎉');
+                showDashboard();
+            } else {
+                showMessage('login-message', data.message, 'error');
+            }
+        } catch (error) {
+            showMessage('login-message', 'Bağlantı hatası!', 'error');
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('reg_username').value.trim();
+        const email = document.getElementById('reg_email').value.trim();
+        const password = document.getElementById('reg_password').value;
+        
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showMessage('register-message', data.message + ' Şimdi giriş yapabilirsiniz.', 'success');
+                setTimeout(() => {
+                    switchAuthTab('login');
+                    document.getElementById('login_username').value = username;
+                }, 2000);
+            } else {
+                showMessage('register-message', data.message, 'error');
+            }
+        } catch (error) {
+            showMessage('register-message', 'Bağlantı hatası!', 'error');
+        }
+    });
+
+    function logout() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        authToken = null;
+        currentUser = null;
+        
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('dashboard').classList.remove('active');
+        
+        if (socket) socket.disconnect();
+    }
+
+    // ==================== DASHBOARD FUNCTIONS ====================
+
+    async function showDashboard() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('dashboard').classList.add('active');
+        
+        // User info
+        document.getElementById('username-display').textContent = currentUser.username;
+        document.getElementById('user-avatar').textContent = currentUser.username.charAt(0).toUpperCase();
+        document.getElementById('wallet-address').textContent = currentUser.wallet_address;
+        
+        // Connect SocketIO
+        socket = io(API_URL);
+        socket.on('new_block', (data) => {
+            showToast('Yeni Blok!', `Blok #${data.index} kazıldı`, '⛓️');
+            loadUserActivity();
+            loadBalance();
+        });
+        
+        // Load data
+        await loadBalance();
+        await loadUserActivity();
+        await loadLocations();
+        await loadLeaderboard();
+        await loadBlockchain();
+    }
+
+    async function loadBalance() {
+        try {
+            const response = await fetch(`${API_URL}/blockchain/balance/${currentUser.username}`);
+            const data = await response.json();
+            
+            document.getElementById('user-balance').textContent = data.balance;
+            document.getElementById('stat-balance').textContent = data.balance;
+        } catch (error) {
+            console.error('Bakiye yükleme hatası:', error);
+        }
+    }
+
+    async function loadUserActivity() {
+        try {
+            const response = await fetch(`${API_URL}/blockchain/activity/${currentUser.username}`);
+            const data = await response.json();
+            
+            document.getElementById('stat-comments').textContent = data.total_comments;
+            document.getElementById('stat-rewards').textContent = data.rewards_earned;
+            
+            // Update chart
+            updateActivityChart(data);
+        } catch (error) {
+            console.error('Aktivite yükleme hatası:', error);
+        }
+    }
+
+    function updateActivityChart(data) {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        
+        if (activityChart) activityChart.destroy();
+        
+        activityChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Yorumlar', 'Gönderilen Transferler', 'Kazanılan Ödüller'],
+                datasets: [{
+                    data: [data.total_comments, data.transfers_sent, data.rewards_earned],
+                    backgroundColor: ['#3b82f6', '#f59e0b', '#10b981']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    async function loadLocations() {
+        try {
+            const response = await fetch(`${API_URL}/locations/list`);
+            const data = await response.json();
+            
+            const container = document.getElementById('locations-list');
+            container.innerHTML = '';
+            
+            if (data.locations.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #6b7280;">Henüz mekan yok. İlk mekanı siz ekleyin!</p>';
+                return;
+            }
+            
+            data.locations.forEach(loc => {
+                const card = document.createElement('div');
+                card.className = 'location-card';
+                card.onclick = () => showLocationDetails(loc.location_id);
+                
+                card.innerHTML = `
+                    <div class="location-image" style="${loc.image_url ? `background-image: url(${loc.image_url}); background-size: cover;` : ''}"></div>
+                    <div class="location-content">
+                        <div class="location-title">${loc.name}</div>
+                        <div style="color: #6b7280; margin-bottom: 10px;">${loc.category || 'Kategori yok'}</div>
+                        <div style="color: #6b7280; font-size: 0.9em; margin-bottom: 10px;">${loc.address || 'Adres bilgisi yok'}</div>
+                        ${loc.is_verified ? '<span style="background: #10b981; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8em;">✓ Onaylı</span>' : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } catch (error) {
+            console.error('Mekan yükleme hatası:', error);
+        }
+    }
+
+    async function showLocationDetails(locationId) {
+        openModal('locationDetailsModal');
+        document.getElementById('location-detail-title').textContent = locationId;
+        
+        try {
+            const response = await fetch(`${API_URL}/blockchain/location_stats/${locationId}`);
+            const data = await response.json();
+            
+            const content = document.getElementById('location-details-content');
+            const stars = '⭐'.repeat(Math.round(data.average_rating));
+            
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">${stars}</div>
+                    <div style="font-size: 2em; font-weight: 700; margin-bottom: 5px;">${data.average_rating.toFixed(1)}</div>
+                    <div style="color: #6b7280;">${data.total_comments} Yorum • ${data.unique_users} Kullanıcı</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="openCommentModal('${locationId}')">💬 Yorum Ekle</button>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px;">Yorumlar</h3>
+            `;
+            
+            if (data.comments.length === 0) {
+                html += '<p style="text-align: center; color: #6b7280; padding: 20px;">Henüz yorum yok. İlk yorumu siz yapın!</p>';
+            } else {
+                data.comments.forEach(comment => {
+                    html += `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-user">${comment.user}</span>
+                                <span class="comment-date">${new Date(comment.time).toLocaleString('tr-TR')}</span>
+                            </div>
+                            <div class="stars">${'⭐'.repeat(comment.rating)}</div>
+                            <p style="margin-top: 10px; color: #374151;">${comment.text}</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            content.innerHTML = html;
+        } catch (error) {
+            console.error('Mekan detay hatası:', error);
+        }
+    }
+
+    async function loadLeaderboard() {
+        try {
+            const response = await fetch(`${API_URL}/blockchain/leaderboard`);
+            const data = await response.json();
+            
+            const container = document.getElementById('leaderboard-list');
+            container.innerHTML = '';
+            
+            data.leaderboard.forEach(user => {
+                const rankClass = user.rank <= 3 ? `rank-${user.rank}` : 'rank-other';
+                
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <div class="rank-badge ${rankClass}">#${user.rank}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; margin-bottom: 5px;">${user.user_id}</div>
+                        <div style="color: #6b7280; font-size: 0.9em;">${user.points} Puan</div>
+                    </div>
+                    ${user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : user.rank === 3 ? '🥉' : ''}
+                `;
+                container.appendChild(item);
+            });
+        } catch (error) {
+            console.error('Leaderboard yükleme hatası:', error);
+        }
+    }
+
+    async function loadBlockchain() {
+        try {
+            const response = await fetch(`${API_URL}/blockchain/chain`);
+            const data = await response.json();
+            
+            const container = document.getElementById('blockchain-display');
+            container.innerHTML = '';
+            
+            [...data.chain].reverse().forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'card';
+                blockDiv.style.marginBottom = '15px';
+                
+                blockDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-weight: 700; font-size: 1.2em;">Blok #${block.index}</div>
+                        <div style="color: #6b7280; font-size: 0.9em;">${new Date(block.timestamp).toLocaleString('tr-TR')}</div>
+                    </div>
+                    <div style="background: var(--light); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <div style="margin-bottom: 10px;"><strong>🔐 Proof:</strong> ${block.proof}</div>
+                        <div style="margin-bottom: 10px;"><strong>🔗 Hash:</strong> <code style="font-size: 0.85em;">${block.previous_hash.substring(0, 20)}...</code></div>
+                        <div><strong>📋 İşlemler:</strong> ${block.transactions.length} adet</div>
+                    </div>
+                    <details>
+                        <summary style="cursor: pointer; color: var(--primary); font-weight: 600;">Detayları Göster</summary>
+                        <pre style="background: #f9fafb; padding: 15px; border-radius: 10px; overflow-x: auto; margin-top: 10px;">${JSON.stringify(block.transactions, null, 2)}</pre>
+                    </details>
+                `;
+                container.appendChild(blockDiv);
+            });
+        } catch (error) {
+            console.error('Blockchain yükleme hatası:', error);
+        }
+    }
+
+    // ==================== ACTION FUNCTIONS ====================
+
+    document.getElementById('addLocationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const locationData = {
+            location_id: document.getElementById('new_location_id').value.trim(),
+            name: document.getElementById('new_location_name').value.trim(),
+            category: document.getElementById('new_location_category').value,
+            address: document.getElementById('new_location_address').value.trim(),
+            description: document.getElementById('new_location_description').value.trim()
+        };
+        
+        try {
+            const response = await fetch(`${API_URL}/locations/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(locationData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showMessage('location-message', data.message, 'success');
+                setTimeout(() => {
+                    closeModal('addLocationModal');
+                    loadLocations();
+                    document.getElementById('addLocationForm').reset();
+                }, 1500);
+            } else {
+                showMessage('location-message', data.message, 'error');
+            }
+        } catch (error) {
+            showMessage('location-message', 'Bağlantı hatası!', 'error');
+        }
+    });
+
+    function openCommentModal(locationId) {
+        closeModal('locationDetailsModal');
+        openModal('commentModal');
+        document.getElementById('comment_location_id').value = locationId;
+        document.getElementById('comment-modal-title').textContent = `${locationId} için Yorum`;
+    }
+
+    document.getElementById('addCommentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const commentData = {
+            location_id: document.getElementById('comment_location_id').value,
+            rating: parseInt(document.getElementById('comment_rating').value),
+            comment_text: document.getElementById('comment_text').value.trim()
+        };
+        
+        try {
+            const response = await fetch(`${API_URL}/blockchain/add_comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(commentData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showMessage('comment-message', data.message, 'success');
+                setTimeout(() => {
+                    closeModal('commentModal');
+                    document.getElementById('addCommentForm').reset();
+                    showToast('Yorum Eklendi!', 'Yorumunuz blockchain\'e kaydedilecek', '💬');
+                }, 1500);
+            } else {
+                showMessage('comment-message', data.message, 'error');
+            }
+        } catch (error) {
+            showMessage('comment-message', 'Bağlantı hatası!', 'error');
+        }
+    });
+
+    async function sendPoints() {
+        const receiver = document.getElementById('transfer_receiver').value.trim();
+        const amount = parseInt(document.getElementById('transfer_amount').value);
+        
+        if (!receiver || !amount || amount <= 0) {
+            showMessage('transfer-message', 'Geçerli bilgiler giriniz!', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_URL}/blockchain/transfer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ receiver, amount })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showMessage('transfer-message', data.message, 'success');
+                loadBalance();
+                document.getElementById('transfer_receiver').value = '';
+                document.getElementById('transfer_amount').value = '';
+                showToast('Transfer Başarılı!', `${amount} puan ${receiver}'e gönderildi`, '💸');
+            } else {
+                showMessage('transfer-message', data.message, 'error');
+            }
+        } catch (error) {
+            showMessage('transfer-message', 'Bağlantı hatası!', 'error');
+        }
+    }
+
+    // ==================== UI HELPER FUNCTIONS ====================
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        
+        // Reload data for specific tabs
+        if (tabName === 'leaderboard') loadLeaderboard();
+        if (tabName === 'blockchain') loadBlockchain();
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function showMessage(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `message ${type} show`;
+        setTimeout(() => element.classList.remove('show'), 5000);
+    }
+
+    function showToast(title, message, icon) {
+        document.getElementById('toast-title').textContent = title;
+        document.getElementById('toast-message').textContent = message;
+        document.getElementById('toast-icon').textContent = icon;
+        document.getElementById('toast').classList.add('show');
+        setTimeout(() => document.getElementById('toast').classList.remove('show'), 5000);
+    }
+
+    // ==================== INIT ====================
+
+    window.onload = () => {
+        const savedToken = localStorage.getItem('authToken');
+        const savedUser = localStorage.getItem('currentUser');
+        
+        if (savedToken && savedUser) {
+            authToken = savedToken;
+            currentUser = JSON.parse(savedUser);
+            showDashboard();
+        }
+    };
+</script>
+</body>
+</html>
